@@ -145,24 +145,19 @@ export default function App() {
   const getFullRouteUrl = () => {
     if (!itinerary || !itinerary.groundingChunks) return null;
     
-    // Extract unique map titles in order
-    const places = Array.from(new Set(
-      itinerary.groundingChunks
-        .filter(chunk => chunk.maps && chunk.maps.title)
-        .map(chunk => chunk.maps.title)
-    ));
+    const places = itinerary.groundingChunks
+      .filter(chunk => chunk.maps && chunk.maps.title)
+      .map(chunk => chunk.maps.title);
 
-    if (places.length < 2) {
-      if (places.length === 1) {
-        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(places[0] as string)}`;
-      }
-      return null;
-    }
+    if (places.length === 0) return null;
 
-    const origin = encodeURIComponent(places[0] as string);
-    const destination = encodeURIComponent(places[places.length - 1] as string);
-    const waypoints = places.length > 2 
-      ? places.slice(1, -1).map(p => encodeURIComponent(p as string)).join('|')
+    const origin = selection.latLng 
+      ? `${selection.latLng.latitude},${selection.latLng.longitude}` 
+      : encodeURIComponent(selection.location || '');
+      
+    const destination = encodeURIComponent(places[places.length - 1]);
+    const waypoints = places.length > 1 
+      ? places.slice(0, -1).map(p => encodeURIComponent(p)).join('|')
       : '';
 
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? `&waypoints=${waypoints}` : ''}&travelmode=walking`;
@@ -336,6 +331,18 @@ export default function App() {
                 >
                   <ArrowLeft className="w-4 h-4" /> Start Over
                 </button>
+
+                {getFullRouteUrl() && (
+                  <a
+                    href={getFullRouteUrl()!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-3 md:px-4 py-2 bg-stone-900 text-white rounded-xl text-xs md:text-sm font-bold hover:bg-stone-800 transition-all shadow-md hover:scale-105 active:scale-95"
+                  >
+                    <Navigation className="w-3 h-3 md:w-4 md:h-4" /> Open Full Route
+                  </a>
+                )}
+
                 <div className="flex gap-2">
                   <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-bold uppercase tracking-wider text-stone-600">
                     {selection.category}
@@ -359,8 +366,8 @@ export default function App() {
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 px-8 py-4 bg-stone-900 text-white rounded-2xl font-bold hover:bg-stone-800 transition-all shadow-xl hover:scale-105 active:scale-95 group"
                     >
-                      <Navigation className="w-5 h-5 group-hover:rotate-45 transition-transform" />
-                      Start Tour
+                      <MapPin className="w-5 h-5 group-hover:animate-bounce" />
+                      Start This Walking Tour
                       <ExternalLink className="w-4 h-4 opacity-50" />
                     </a>
                   </div>
