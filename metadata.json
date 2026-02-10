@@ -1,0 +1,5 @@
+{
+  "name": "Urban Explorer: Walking Tour Planner",
+  "description": "Plan personalized walking tours based on your interests, location, and available time using AI-powered itineraries.",
+  "requestFramePermissions": ["geolocation"]
+}
